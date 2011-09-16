@@ -260,8 +260,10 @@
 "   may occur (such as with VCSVimDiff, when using a VCS command on a VCS
 "   command buffer, or when the 'VCSCommandEdit' variable is set to 'split'.
 "   If set to 'horizontal', the resulting windows will be on stacked on top of
-"   one another.  If set to 'vertical', the resulting windows will be
-"   side-by-side.  If not set, it defaults to 'horizontal' for all but
+"   one another. If set to 'vertical', the resulting windows will be
+"   side-by-side. If set to 'bottom', the resulting windows will be shown
+"   at the bottom. 
+"   If not set, it defaults to 'horizontal' for all but
 "   VCSVimDiff windows.
 "
 " VCSCommandVCSTypeOverride
@@ -440,6 +442,14 @@ function! s:ExecuteExtensionMapping(mapping)
 	silent execute 'normal!' ':' .  s:plugins[vcsType][2][a:mapping] . "\<CR>"
 endfunction
 
+function! VCSIsNERDTreeBuffer(originalBuffer)
+    return getbufvar(a:originalBuffer, "&filetype") == "nerdtree"
+endfunction
+
+function! VCSGetNERDTreeBufferName(buffer)
+    return getbufvar(a:buffer, 'NERDTreeRoot').path.str()
+endfunction
+
 " Function: s:ExecuteVCSCommand(command, argList) {{{2
 " Calls the indicated plugin-specific VCS command on the current buffer.
 " Returns: buffer number of resulting output scratch buffer, or -1 if an error
@@ -461,8 +471,10 @@ function! s:ExecuteVCSCommand(command, argList)
 		" checks are needed.  Otherwise, perform some basic sanity checks to avoid
 		" VCS-specific error messages from confusing things.
 		if !isdirectory(bufferName)
-			if !filereadable(bufferName)
-				throw 'No such file ' . bufferName
+			if !VCSIsNERDTreeBuffer(originalBuffer)
+				if !filereadable(bufferName)
+					throw 'No such file ' . bufferName
+				endif
 			endif
 		endif
 
@@ -483,6 +495,11 @@ endfunction
 
 function! s:GenerateResultBufferName(command, originalBuffer, vcsType, statusText)
 	let fileName = bufname(a:originalBuffer)
+
+	if VCSIsNERDTreeBuffer(a:originalBuffer)
+		let fileName = VCSGetNERDTreeBufferName(a:originalBuffer)
+	endif
+
 	let bufferName = a:vcsType . ' ' . a:command
 	if strlen(a:statusText) > 0
 		let bufferName .= ' ' . a:statusText
@@ -503,7 +520,12 @@ endfunction
 
 function! s:GenerateResultBufferNameWithExtension(command, originalBuffer, vcsType, statusText)
 	let fileName = bufname(a:originalBuffer)
-	let bufferName = a:vcsType . ' ' . a:command
+
+	if VCSIsNERDTreeBuffer(a:originalBuffer)
+		let fileName = VCSGetNERDTreeBufferName(a:originalBuffer)
+	endif
+
+    let bufferName = a:vcsType . ' ' . a:command
 	if strlen(a:statusText) > 0
 		let bufferName .= ' ' . a:statusText
 	endif
@@ -529,8 +551,12 @@ function! s:EditFile(command, originalBuffer, statusText)
 	try
 		let editCommand = VCSCommandGetOption('VCSCommandEdit', 'split')
 		if editCommand == 'split'
-			if VCSCommandGetOption('VCSCommandSplit', 'horizontal') == 'horizontal'
+			let splitType = VCSCommandGetOption('VCSCommandSplit', 'horizontal')
+			if splitType == 'horizontal'
 				rightbelow split
+			elseif splitType == 'bottom'
+				rightbelow split
+				execute "normal \<C-W>J"
 			else
 				vert rightbelow split
 			endif
@@ -1031,10 +1057,12 @@ endfunction
 " Multiple inexact matches is currently considered an error.
 
 function! VCSCommandGetVCSType(buffer)
-	let vcsType = getbufvar(a:buffer, 'VCSCommandVCSType')
-	if strlen(vcsType) > 0
-		return vcsType
-	endif
+    if !VCSIsNERDTreeBuffer(a:buffer)
+        let vcsType = getbufvar(a:buffer, 'VCSCommandVCSType')
+        if strlen(vcsType) > 0
+            return vcsType
+        endif
+    endif
 	if exists("g:VCSCommandVCSTypeOverride")
 		let fullpath = fnamemodify(bufname(a:buffer), ':p')
 		for [path, vcsType] in g:VCSCommandVCSTypeOverride
@@ -1155,6 +1183,10 @@ function! VCSCommandDoCommand(cmd, cmdName, statusText, options)
 
 	if isdirectory(path)
 		let fileName = '.'
+	elseif VCSIsNERDTreeBuffer(originalBuffer)
+		let nerdTreeRoot = VCSGetNERDTreeBufferName(originalBuffer)
+		let path = resolve(nerdTreeRoot)
+		let fileName = nerdTreeRoot
 	else
 		let fileName = fnamemodify(path, ':t')
 	endif

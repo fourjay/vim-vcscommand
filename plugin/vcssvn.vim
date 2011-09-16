@@ -92,6 +92,8 @@ function! s:svnFunctions.Identify(buffer)
 	let fileName = resolve(bufname(a:buffer))
 	if isdirectory(fileName)
 		let directoryName = fileName
+	elseif VCSIsNERDTreeBuffer(a:buffer)
+		let directoryName = VCSGetNERDTreeBufferName(a:buffer)
 	else
 		let directoryName = fnamemodify(fileName, ':h')
 	endif
