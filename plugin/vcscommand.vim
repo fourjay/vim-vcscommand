@@ -1286,6 +1286,14 @@ function! VCSCommandDoCommand(cmd, cmdName, statusText, options)
 
 	silent 0put=output
 
+	" Remove the explicit BOM from the output
+	if(VCSCommandGetOption('VCSCommandRemoveBOM', 1))
+		execute "1s/^\ufeff//e"
+	endif
+	if(VCSCommandGetOption('VCSCommandRemoveAllBOM', 0))
+		execute "%s/\ufeff//e"
+	endif
+
 	" The last command left a blank line at the end of the buffer.  If the
 	" last line is folded (a side effect of the 'put') then the attempt to
 	" remove the blank line will kill the last fold.
