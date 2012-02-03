@@ -499,15 +499,16 @@ function! s:ExecuteVCSCommand(command, argList)
 
 		let originalBuffer = VCSCommandGetOriginalBuffer(buffer)
 		let bufferName = bufname(originalBuffer)
+		if VCSIsNERDTreeBuffer(originalBuffer)
+			let bufferName = VCSGetNERDTreeBufferName(originalBuffer)
+		endif
 
 		" It is already known that the directory is under VCS control.  No further
 		" checks are needed.  Otherwise, perform some basic sanity checks to avoid
 		" VCS-specific error messages from confusing things.
 		if !isdirectory(bufferName)
-			if !VCSIsNERDTreeBuffer(originalBuffer)
-				if !filereadable(bufferName)
-					throw 'No such file ' . bufferName
-				endif
+			if !filereadable(bufferName)
+				throw 'No such file ' . bufferName
 			endif
 		endif
 
