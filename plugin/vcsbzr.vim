@@ -82,13 +82,12 @@ endfunction
 
 " Section: VCS function implementations {{{1
 
-" Function: s:bzrFunctions.Identify(buffer) {{{2
-function! s:bzrFunctions.Identify(buffer)
-  let fileName = resolve(bufname(a:buffer))
+" Function: s:bzrFunctions.Identify(path) {{{2
+function! s:bzrFunctions.Identify(path)
   let l:save_bzr_log=$BZR_LOG
   try
     let $BZR_LOG=has("win32") || has("win95") || has("win64") || has("win16") ? "nul" : "/dev/null"
-    let statusText = s:VCSCommandUtility.system(s:Executable() . ' info -- "' . fileName . '"')
+    let statusText = s:VCSCommandUtility.system(s:Executable() . ' info -- "' . a:path . '"')
   finally
     let $BZR_LOG=l:save_bzr_log
   endtry

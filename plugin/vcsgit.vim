@@ -87,11 +87,11 @@ endfunction
 
 " Section: VCS function implementations {{{1
 
-" Function: s:gitFunctions.Identify(buffer) {{{2
+" Function: s:gitFunctions.Identify(path) {{{2
 " This function only returns an inexact match due to the detection method used
 " by git, which simply traverses the directory structure upward.
-function! s:gitFunctions.Identify(buffer)
-	let oldCwd = VCSCommandChangeToCurrentFileDir(resolve(bufname(a:buffer)))
+function! s:gitFunctions.Identify(path)
+	let oldCwd = VCSCommandChangeToCurrentFileDir(a:path)
 	try
 		call s:VCSCommandUtility.system(s:Executable() . ' rev-parse --is-inside-work-tree')
 		if(v:shell_error)

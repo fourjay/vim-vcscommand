@@ -82,13 +82,12 @@ endfunction
 
 " Section: VCS function implementations {{{1
 
-" Function: s:svkFunctions.Identify(buffer) {{{2
-function! s:svkFunctions.Identify(buffer)
-	let fileName = resolve(bufname(a:buffer))
-	if isdirectory(fileName)
-		let directoryName = fileName
+" Function: s:svkFunctions.Identify(path) {{{2
+function! s:svkFunctions.Identify(path)
+	if isdirectory(a:path)
+		let directoryName = a:path
 	else
-		let directoryName = fnamemodify(fileName, ':p:h')
+		let directoryName = fnamemodify(a:path, ':p:h')
 	endif
 	let statusText = s:VCSCommandUtility.system(s:Executable() . ' info -- "' . directoryName . '"', "no")
 	if(v:shell_error)

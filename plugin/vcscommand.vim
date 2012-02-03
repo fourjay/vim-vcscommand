@@ -613,10 +613,15 @@ endfunction
 " thrown in case no type can be identified.
 
 function!  s:IdentifyVCSType(buffer)
+	let fullPath = bufname(a:buffer)
+	if VCSIsNERDTreeBuffer(a:buffer)
+		let fullPath = VCSGetNERDTreeBufferName(a:buffer)
+	endif
+	let fullPath = resolve(fullPath)
 	if exists("g:VCSCommandVCSTypeOverride")
-		let fullpath = fnamemodify(bufname(a:buffer), ':p')
+		let dirpath = fnamemodify(fullPath), ':p')
 		for [path, vcsType] in g:VCSCommandVCSTypeOverride
-			if match(fullpath, path) > -1
+			if match(dirpath, path) > -1
 				return vcsType
 			endif
 		endfor
@@ -625,7 +630,7 @@ function!  s:IdentifyVCSType(buffer)
 	let exactMatch = ''
 	let exactMatchCount = 0
 	for vcsType in keys(s:plugins)
-		let identified = s:plugins[vcsType][1].Identify(a:buffer)
+		let identified = s:plugins[vcsType][1].Identify(fullPath)
 		if identified
 			if identified == g:VCSCOMMAND_IDENTIFY_EXACT
 				let exactMatch = vcsType
@@ -1163,16 +1168,12 @@ endfunction
 "   7. error if no matching types
 
 function! VCSCommandGetVCSType(buffer)
-	let buffer = a:buffer
-	if VCSIsNERDTreeBuffer(a:buffer)
-		let buffer = VCSGetNERDTreeBufferName(a:buffer)
-	endif
 	let vcsType = VCSCommandGetOption('VCSCommandVCSTypeExplicitOverride', '')
 	if len(vcsType) == 0
-		let vcsType = getbufvar(buffer, 'VCSCommandVCSType')
+		let vcsType = getbufvar(a:buffer, 'VCSCommandVCSType')
 		if strlen(vcsType) == 0
-			let vcsType = s:IdentifyVCSType(buffer)
-			call setbufvar(buffer, 'VCSCommandVCSType', vcsType)
+			let vcsType = s:IdentifyVCSType(a:buffer)
+			call setbufvar(a:buffer, 'VCSCommandVCSType', vcsType)
 		endif
 	endif
 	return vcsType

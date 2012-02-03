@@ -89,9 +89,9 @@ endfunction
 
 " Section: VCS function implementations {{{1
 
-" Function: s:hgFunctions.Identify(buffer) {{{2
-function! s:hgFunctions.Identify(buffer)
-	let oldCwd = VCSCommandChangeToCurrentFileDir(resolve(bufname(a:buffer)))
+" Function: s:hgFunctions.Identify(path) {{{2
+function! s:hgFunctions.Identify(path)
+	let oldCwd = VCSCommandChangeToCurrentFileDir(a:path)
 	try
 		call s:VCSCommandUtility.system(s:Executable() . ' root')
 		if(v:shell_error)

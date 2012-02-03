@@ -154,13 +154,12 @@ endfunction
 
 " Section: VCS function implementations {{{1
 
-" Function: s:cvsFunctions.Identify(buffer) {{{2
-function! s:cvsFunctions.Identify(buffer)
-	let fileName = resolve(bufname(a:buffer))
-	if isdirectory(fileName)
-		let directoryName = fileName
+" Function: s:cvsFunctions.Identify(path) {{{2
+function! s:cvsFunctions.Identify(path)
+	if isdirectory(a:path)
+		let directoryName = a:path
 	else
-		let directoryName = fnamemodify(fileName, ':h')
+		let directoryName = fnamemodify(a:path, ':h')
 	endif
 	if strlen(directoryName) > 0
 		let CVSRoot = directoryName . '/CVS/Root'
