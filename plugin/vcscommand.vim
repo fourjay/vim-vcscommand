@@ -583,16 +583,26 @@ function! s:EditFile(command, originalBuffer, statusText)
 	" Protect against useless buffer set-up
 	let s:isEditFileRunning += 1
 	try
-		let editCommand = VCSCommandGetOption('VCSCommandEdit', 'split')
-		if editCommand == 'split'
-			let splitType = VCSCommandGetOption('VCSCommandSplit', 'horizontal')
-			if splitType == 'horizontal'
-				rightbelow split
-			elseif splitType == 'bottom'
-				rightbelow split
-				execute "normal \<C-W>J"
-			else
-				vert rightbelow split
+		if VCSIsNERDTreeBuffer(bufnr('%'))
+			let width = winwidth(0)
+			rightbelow split
+			wincmd J
+			execute winnr('#') 'wincmd w'
+			wincmd H
+			execute "vert resize" width
+			execute winnr('#') 'wincmd w'
+		else
+			let editCommand = VCSCommandGetOption('VCSCommandEdit', 'split')
+			if editCommand == 'split'
+				let splitType = VCSCommandGetOption('VCSCommandSplit', 'horizontal')
+				if splitType == 'horizontal'
+					rightbelow split
+				elseif splitType == 'bottom'
+					rightbelow split
+					wincmd J
+				else
+					vert rightbelow split
+				endif
 			endif
 		endif
 
