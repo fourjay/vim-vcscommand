@@ -260,11 +260,10 @@
 "   may occur (such as with VCSVimDiff, when using a VCS command on a VCS
 "   command buffer, or when the 'VCSCommandEdit' variable is set to 'split'.
 "   If set to 'horizontal', the resulting windows will be on stacked on top of
-"   one another. If set to 'vertical', the resulting windows will be
-"   side-by-side. If set to 'bottom', the resulting windows will be shown
-"   at the bottom. 
-"   If not set, it defaults to 'horizontal' for all but
-"   VCSVimDiff windows.
+"   one another.  If set to 'vertical', the resulting windows will be
+"   side-by-side. If set to 'bottom', the resulting windows will be shown at
+"   the bottom. If not set, it defaults to 'horizontal' for all but VCSVimDiff
+"   windows.
 "
 " VCSCommandVCSTypeOverride
 "   This variable allows the VCS type detection to be overridden on a
@@ -529,7 +528,6 @@ endfunction
 
 function! s:GenerateResultBufferName(command, originalBuffer, vcsType, statusText)
 	let fileName = bufname(a:originalBuffer)
-
 	if VCSIsNERDTreeBuffer(a:originalBuffer)
 		let fileName = VCSGetNERDTreeBufferName(a:originalBuffer)
 	endif
@@ -554,7 +552,6 @@ endfunction
 
 function! s:GenerateResultBufferNameWithExtension(command, originalBuffer, vcsType, statusText)
 	let fileName = bufname(a:originalBuffer)
-
 	if VCSIsNERDTreeBuffer(a:originalBuffer)
 		let fileName = VCSGetNERDTreeBufferName(a:originalBuffer)
 	endif
