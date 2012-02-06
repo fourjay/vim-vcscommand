@@ -583,7 +583,7 @@ function! s:EditFile(command, originalBuffer, statusText)
 	" Protect against useless buffer set-up
 	let s:isEditFileRunning += 1
 	try
-		if VCSIsNERDTreeBuffer(bufnr('%'))
+		if winnr('$') > 1 && VCSIsNERDTreeBuffer(bufnr('%'))
 			let width = winwidth(0)
 			rightbelow split
 			wincmd J
