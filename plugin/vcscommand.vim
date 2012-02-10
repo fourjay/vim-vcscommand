@@ -510,6 +510,17 @@ function! s:ExecuteVCSCommand(command, argList)
 	endtry
 endfunction
 
+" Function: s:ExecuteOnAll(command) {{{2
+" Calls the quoted command on a list of files pulle from the clipboard.
+
+function! s:ExecuteOnAll(command)
+	call s:VCSCommandUtility.pushContext({'VCSExecuteOnAll': 1})
+	try
+		execute a:command
+		call s:VCSCommandUtility.popContext()
+	endtry
+endfunction
+
 " Function: s:GenerateResultBufferName(command, originalBuffer, vcsType, statusText) {{{2
 " Default method of generating the name for VCS result buffers.  This can be
 " overridden with the VCSResultBufferNameFunction variable.
@@ -1238,26 +1249,35 @@ function! VCSCommandDoCommand(cmd, cmdName, statusText, options)
 	" Work with netrw or other systems where a directory listing is displayed in
 	" a buffer.
 
-	if isdirectory(path)
-		let fileName = '.'
+	let isMulti = VCSCommandGetOption('VCSExecuteOnAll', 0)
+	if isMulti
+		let fileNames = split(getreg('*'))
 	else
-		let fileName = fnamemodify(path, ':t')
+		if isdirectory(path)
+			let fileNames = ['.']
+		else
+			let fileNames = [fnamemodify(path, ':t')]
+		endif
 	endif
 
 	if match(a:cmd, '<VCSCOMMANDFILE>') > 0
 		let fullCmd = substitute(a:cmd, '<VCSCOMMANDFILE>', fileName, 'g')
 	else
-		let fullCmd = a:cmd . ' -- ' . shellescape(fileName)
+		let fullCmd = a:cmd . ' -- ' . join(map(fileNames, 'shellescape(v:val)'))
 	endif
 
 	" Change to the directory of the current buffer.  This is done for CVS, but
 	" is left in for other systems as it does not affect them negatively.
 
-	let oldCwd = VCSCommandChangeToCurrentFileDir(path)
+	if !isMulti
+		let oldCwd = VCSCommandChangeToCurrentFileDir(path)
+	endif
 	try
 		let output = s:VCSCommandUtility.system(fullCmd)
 	finally
-		call VCSCommandChdir(oldCwd)
+		if !isMulti
+			call VCSCommandChdir(oldCwd)
+		endif
 	endtry
 
 	" HACK:  if line endings in the repository have been corrupted, the output
@@ -1408,6 +1428,9 @@ com! VCSCommandEnableBufferSetup call VCSCommandEnableBufferSetup()
 
 " Allow reloading VCSCommand.vim
 com! VCSReload let savedPlugins = s:plugins|let s:plugins = {}|call s:ClearMenu()|unlet! g:loaded_VCSCommand|runtime plugin/vcscommand.vim|for plugin in values(savedPlugins)|execute 'source' plugin[0]|endfor|unlet savedPlugins
+
+" Execute a VCSCommand on multiple files in the clipboard
+com! -nargs=+ -complete=command VCSAll call s:ExecuteOnAll(<q-args>)
 
 " Section: Plugin command mappings {{{1
 if !exists("no_plugin_maps")
