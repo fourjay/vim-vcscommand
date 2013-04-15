@@ -464,11 +464,11 @@ function! s:ExecuteExtensionMapping(mapping)
 	silent execute 'normal!' ':' .  s:plugins[vcsType][2][a:mapping] . "\<CR>"
 endfunction
 
-function! VCSIsNERDTreeBuffer(originalBuffer)
+function! s:IsNERDTreeBuffer(originalBuffer)
 	return getbufvar(a:originalBuffer, "&filetype") == "nerdtree"
 endfunction
 
-function! VCSGetNERDTreeBufferName(buffer)
+function! s:GetNERDTreeBufferName(buffer)
 	return getbufvar(a:buffer, 'NERDTreeRoot').path.str()
 endfunction
 
@@ -488,8 +488,8 @@ function! s:ExecuteVCSCommand(command, argList)
 
 		let originalBuffer = VCSCommandGetOriginalBuffer(buffer)
 		let bufferName = bufname(originalBuffer)
-		if VCSIsNERDTreeBuffer(originalBuffer)
-			let bufferName = VCSGetNERDTreeBufferName(originalBuffer)
+		if s:IsNERDTreeBuffer(originalBuffer)
+			let bufferName = s:GetNERDTreeBufferName(originalBuffer)
 		endif
 
 		" It is already known that the directory is under VCS control.  No further
@@ -518,8 +518,8 @@ endfunction
 
 function! s:GenerateResultBufferName(command, originalBuffer, vcsType, statusText)
 	let fileName = bufname(a:originalBuffer)
-	if VCSIsNERDTreeBuffer(a:originalBuffer)
-		let fileName = VCSGetNERDTreeBufferName(a:originalBuffer)
+	if s:IsNERDTreeBuffer(a:originalBuffer)
+		let fileName = s:GetNERDTreeBufferName(a:originalBuffer)
 	endif
 
 	let bufferName = a:vcsType . ' ' . a:command
@@ -542,8 +542,8 @@ endfunction
 
 function! s:GenerateResultBufferNameWithExtension(command, originalBuffer, vcsType, statusText)
 	let fileName = bufname(a:originalBuffer)
-	if VCSIsNERDTreeBuffer(a:originalBuffer)
-		let fileName = VCSGetNERDTreeBufferName(a:originalBuffer)
+	if s:IsNERDTreeBuffer(a:originalBuffer)
+		let fileName = s:GetNERDTreeBufferName(a:originalBuffer)
 	endif
 
 	let bufferName = a:vcsType . ' ' . a:command
@@ -570,7 +570,7 @@ function! s:EditFile(command, originalBuffer, statusText)
 	" Protect against useless buffer set-up
 	let s:isEditFileRunning += 1
 	try
-		if winnr('$') > 1 && VCSIsNERDTreeBuffer(bufnr('%'))
+		if winnr('$') > 1 && s:IsNERDTreeBuffer(bufnr('%'))
 			let width = winwidth(0)
 			rightbelow split
 			wincmd J
@@ -611,8 +611,8 @@ endfunction
 
 function!  s:IdentifyVCSType(buffer)
 	let fullPath = bufname(a:buffer)
-	if VCSIsNERDTreeBuffer(a:buffer)
-		let fullPath = VCSGetNERDTreeBufferName(a:buffer)
+	if s:IsNERDTreeBuffer(a:buffer)
+		let fullPath = s:GetNERDTreeBufferName(a:buffer)
 	endif
 	let fullPath = resolve(fullPath)
 	if exists("g:VCSCommandVCSTypeOverride")
@@ -1267,8 +1267,8 @@ function! VCSCommandDoCommand(cmd, cmdName, statusText, options)
 
 	if isdirectory(path)
 		let fileName = '.'
-	elseif VCSIsNERDTreeBuffer(originalBuffer)
-		let nerdTreeRoot = VCSGetNERDTreeBufferName(originalBuffer)
+	elseif s:IsNERDTreeBuffer(originalBuffer)
+		let nerdTreeRoot = s:GetNERDTreeBufferName(originalBuffer)
 		let path = resolve(nerdTreeRoot)
 		let fileName = nerdTreeRoot
 	else
