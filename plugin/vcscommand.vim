@@ -464,6 +464,19 @@ function! s:ExecuteExtensionMapping(mapping)
 	silent execute 'normal!' ':' .  s:plugins[vcsType][2][a:mapping] . "\<CR>"
 endfunction
 
+" Function: s:GetBufferName(buffer) {{{2
+" Retrieve the buffer name for the given buffer number.  This abstracts over
+" special ways to identify the buffer name, for instance using NERDTree.
+
+function! s:GetBufferName(buffer)
+	if s:IsNERDTreeBuffer(a:buffer)
+		let bufferName = s:GetNERDTreeBufferName(a:buffer)
+	else
+		let bufferName = bufname(a:buffer)
+	endif
+	return bufferName
+endfunction
+
 function! s:IsNERDTreeBuffer(originalBuffer)
 	return getbufvar(a:originalBuffer, "&filetype") == "nerdtree"
 endfunction
@@ -487,10 +500,7 @@ function! s:ExecuteVCSCommand(command, argList)
 		endif
 
 		let originalBuffer = VCSCommandGetOriginalBuffer(buffer)
-		let bufferName = bufname(originalBuffer)
-		if s:IsNERDTreeBuffer(originalBuffer)
-			let bufferName = s:GetNERDTreeBufferName(originalBuffer)
-		endif
+		let bufferName = s:GetBufferName(originalBuffer)
 
 		" It is already known that the directory is under VCS control.  No further
 		" checks are needed.  Otherwise, perform some basic sanity checks to avoid
@@ -517,11 +527,7 @@ endfunction
 " overridden with the VCSResultBufferNameFunction variable.
 
 function! s:GenerateResultBufferName(command, originalBuffer, vcsType, statusText)
-	let fileName = bufname(a:originalBuffer)
-	if s:IsNERDTreeBuffer(a:originalBuffer)
-		let fileName = s:GetNERDTreeBufferName(a:originalBuffer)
-	endif
-
+	let fileName = s:GetBufferName(a:originalBuffer)
 	let bufferName = a:vcsType . ' ' . a:command
 	if strlen(a:statusText) > 0
 		let bufferName .= ' ' . a:statusText
@@ -541,11 +547,7 @@ endfunction
 " file name with the VCS type and command appended as extensions.
 
 function! s:GenerateResultBufferNameWithExtension(command, originalBuffer, vcsType, statusText)
-	let fileName = bufname(a:originalBuffer)
-	if s:IsNERDTreeBuffer(a:originalBuffer)
-		let fileName = s:GetNERDTreeBufferName(a:originalBuffer)
-	endif
-
+	let fileName = s:GetBufferName(a:originalBuffer)
 	let bufferName = a:vcsType . ' ' . a:command
 	if strlen(a:statusText) > 0
 		let bufferName .= ' ' . a:statusText
@@ -610,11 +612,7 @@ endfunction
 " thrown in case no type can be identified.
 
 function!  s:IdentifyVCSType(buffer)
-	let fullPath = bufname(a:buffer)
-	if s:IsNERDTreeBuffer(a:buffer)
-		let fullPath = s:GetNERDTreeBufferName(a:buffer)
-	endif
-	let fullPath = resolve(fullPath)
+	let fullPath = resolve(s:GetBufferName(a:buffer))
 	if exists("g:VCSCommandVCSTypeOverride")
 		let dirpath = fnamemodify(fullPath), ':p')
 		for [path, vcsType] in g:VCSCommandVCSTypeOverride
@@ -1260,16 +1258,13 @@ function! VCSCommandDoCommand(cmd, cmdName, statusText, options)
 		throw 'Original buffer no longer exists, aborting.'
 	endif
 
-	let path = resolve(bufname(originalBuffer))
+	let path = resolve(s:GetBufferName((originalBuffer)))
 
 	" Work with netrw or other systems where a directory listing is displayed in
 	" a buffer.
 
 	if isdirectory(path)
 		let fileName = '.'
-	elseif s:IsNERDTreeBuffer(originalBuffer)
-		let fileName = s:GetNERDTreeBufferName(originalBuffer)
-		let path = resolve(fileName)
 	else
 		let fileName = fnamemodify(path, ':t')
 	endif
