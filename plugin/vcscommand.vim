@@ -1268,9 +1268,8 @@ function! VCSCommandDoCommand(cmd, cmdName, statusText, options)
 	if isdirectory(path)
 		let fileName = '.'
 	elseif s:IsNERDTreeBuffer(originalBuffer)
-		let nerdTreeRoot = s:GetNERDTreeBufferName(originalBuffer)
-		let path = resolve(nerdTreeRoot)
-		let fileName = nerdTreeRoot
+		let fileName = s:GetNERDTreeBufferName(originalBuffer)
+		let path = resolve(fileName)
 	else
 		let fileName = fnamemodify(path, ':t')
 	endif
