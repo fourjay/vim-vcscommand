@@ -4,7 +4,7 @@ vcscommand with some minor Useablity mods
 
 This is a fork/copy of the last updated version of VCScommand
 
-    http://repo.or.cz/w/vcscommand.git
+http://repo.or.cz/w/vcscommand.git
 
 I've added
 
