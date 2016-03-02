@@ -1291,6 +1291,15 @@ function! VCSCommandDoCommand(cmd, cmdName, statusText, options)
 	" Define the environment and execute user-defined hooks.
 
 	silent do VCSCommand User VCSBufferCreated
+
+        " keep these buffers from being edited without intent
+        if 
+                    \    a:cmd =~? 'log'
+                    \ || a:cmd =~? 'blame'
+                    \ || a:cmd =~? 'annotate'
+            setlocal nomodifiable
+        endif
+
 	return bufnr('%')
 endfunction
 
