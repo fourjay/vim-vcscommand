@@ -8,7 +8,8 @@ This is a fork/copy of the last updated version of VCScommand
 
 I've added
 
-    * Some revision parsing logic
-    * mapping for automatic diffing from logs
-    * nomodifiable is set on most output files
-    * ]] and [[ mapping in log view
+* Some revision parsing logic
+* mapping for automatic diffing from logs
+* nomodifiable is set on most output files
+* ]] and [[ mapping in log view
+* minor syntax highlighting
