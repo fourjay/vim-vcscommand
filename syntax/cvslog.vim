@@ -8,7 +8,7 @@ syntax keyword CVSkeyword head branch locks
 syntax keyword CVSkeyword date author state commitid
 
 syntax match cvsRevision /^revision [0-9.]\+/
-syntax match cvsSeparator /^[-]{5,}/
+syntax match cvsSeparator /^[-]\{5,}/
 
 if !exists("did_cvslog_syntax_inits")
         highlight link cvsRevision      Statement
