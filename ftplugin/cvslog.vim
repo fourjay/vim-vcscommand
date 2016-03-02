@@ -15,3 +15,5 @@ nnoremap <buffer> <nowait> [[ :call <SID>search_revision('reverse')<cr>
 
 nnoremap <buffer> <nowait> d :call vcscommand#revision#diff_prior()<cr>
 nnoremap <buffer> <nowait> <enter> :call vcscommand#revision#diff_prior()<cr>
+
+nnoremap <buffer> <nowait> D :call vcscommand#revision#diff_head()<cr>

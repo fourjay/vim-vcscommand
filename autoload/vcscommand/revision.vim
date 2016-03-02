@@ -62,3 +62,8 @@ function! vcscommand#revision#diff_prior()
     endif
     execute 'VCSVimDiff ' .  revision . ' ' . prior
 endfunction
+
+function! vcscommand#revision#diff_head()
+    let revision = vcscommand#revision#get()
+    execute 'VCSVimDiff ' .  revision
+endfunction
