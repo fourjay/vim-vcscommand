@@ -30,8 +30,10 @@ function! vcscommand#revision#get_line(line_number)
         return second
     elseif &filetype ==  'SVNAnnotate'
         let trimmed  =  substitute( line, '^     ', '', '')
-        echom "trimmed " . trimmed
         return substitute( trimmed, '[ ].*', '', '')
+    elseif &filetype ==  'gitannotate'
+        let gitid  =  substitute( line, ' .*', '', '')
+        return gitid
     else
         return ''
     endif
