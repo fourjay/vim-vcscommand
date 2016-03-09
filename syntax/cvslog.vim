@@ -10,7 +10,8 @@ syntax keyword CVSkeyword date author state commitid
 syntax match cvsRevision /^revision [0-9.]\+/
 syntax match cvsSeparator /^[-]\{5,}/
 
-if !exists("did_cvslog_syntax_inits")
+if !exists("b:did_cvslog_syntax_inits")
+        let b:did_cvslog_syntax_inits = 1
         highlight link cvsRevision      Statement
         highlight link cvsKeyword       Keyword
         highlight link cvsSeparator     Special
