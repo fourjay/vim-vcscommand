@@ -1,5 +1,5 @@
 " do math on dotted revisions i.e. 
-function! vcscommand#revision#math(revision, interval)
+function! vcscommand#revision#math(revision, interval) abort
     " If it's just a number, do the math
     if a:revision =~# '^[0-9]\+$'
         return a:revision + a:interval
@@ -13,7 +13,7 @@ function! vcscommand#revision#math(revision, interval)
     return ''
 endfunction
 
-function! vcscommand#revision#get_line(line_number)
+function! vcscommand#revision#get_line(line_number) abort
     let l:line = getline(a:line_number)
     " rcslog style
     if l:line =~# '^revision'
@@ -22,16 +22,16 @@ function! vcscommand#revision#get_line(line_number)
     elseif l:line =~# '^[0-9.]\+ '
         return substitute( l:line, ' .*', '', '')
     " SVN style revision
-    elseif l:line =~ '^r[0-9]\+ \| [0-9-] .* [0-9]\+ lines$'
+    elseif l:line =~# '^r[0-9]\+ \| [0-9-] .* [0-9]\+ lines$'
         let l:first =  substitute( l:line, ' | .*', '', '')
         return substitute( l:first, '^[ ]*r', '', '')
-    elseif l:line =~ '^commit [0-9a-z]\{20,}$'
+    elseif l:line =~# '^commit [0-9a-z]\{20,}$'
         let l:second =  substitute( l:line, '^commit ', '', '')
         return l:second
-    elseif &filetype ==  'SVNAnnotate'
+    elseif &filetype ==#  'SVNAnnotate'
         let l:trimmed  =  substitute( l:line, '^     ', '', '')
         return substitute( l:trimmed, '[ ].*', '', '')
-    elseif &filetype ==  'gitannotate'
+    elseif &filetype ==#  'gitannotate'
         let l:gitid  =  substitute( l:line, ' .*', '', '')
         return l:gitid
     else
@@ -39,7 +39,7 @@ function! vcscommand#revision#get_line(line_number)
     endif
 endfunction
 
-function! vcscommand#revision#get()
+function! vcscommand#revision#get() abort
     " try line first
     let l:result = vcscommand#revision#get_line( line('.') )
     if ! l:result
@@ -55,7 +55,7 @@ function! vcscommand#revision#get()
     return l:result
 endfunction
 
-function! vcscommand#revision#diff_prior()
+function! vcscommand#revision#diff_prior() abort
     let l:revision = vcscommand#revision#get()
     if ! l:revision
         return
@@ -68,7 +68,7 @@ function! vcscommand#revision#diff_prior()
     execute 'VCSVimDiff ' .  l:revision . ' ' . l:prior
 endfunction
 
-function! vcscommand#revision#diff_head()
+function! vcscommand#revision#diff_head() abort
     let l:revision = vcscommand#revision#get()
     execute 'VCSVimDiff ' .  l:revision
 endfunction
