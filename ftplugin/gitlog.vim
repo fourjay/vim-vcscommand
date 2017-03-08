@@ -1,12 +1,13 @@
 setlocal readonly
+set nonumber
 
 function! s:search_revision( direction )
-    let flags = 'W'
-    if a:direction == 'reverse'
-        let flags = 'bW'
+    let l:flags = 'W'
+    if a:direction ==# 'reverse'
+        let l:flags = 'bW'
     endif
-    call search('^commit ', flags )
-    normal zz
+    call search('^commit ', l:flags )
+    normal! zz
 endfunction
 
 nnoremap <buffer> <nowait> ]] :call <SID>search_revision('forward')<cr>
