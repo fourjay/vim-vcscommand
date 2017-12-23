@@ -400,6 +400,7 @@ endfunction
 " Adds the given menu item.
 
 function! s:VCSCommandUtility.addMenuItem(shortcut, command)
+        if ! has('gui_running') | return | endif
 	if s:menuEnabled
 	    exe 'amenu <silent> '.s:menuPriority.' '.s:menuRoot.'.'.a:shortcut.' '.a:command
 	endif
@@ -1463,23 +1464,25 @@ let s:menuEnabled = !VCSCommandGetOption('VCSCommandDisableMenu', 0)
 let s:menuRoot = VCSCommandGetOption('VCSCommandMenuRoot', '&Plugin.VCS')
 let s:menuPriority = VCSCommandGetOption('VCSCommandMenuPriority', '')
 
-for [s:shortcut, s:command] in [
-			\['&Add', '<Plug>VCSAdd'],
-			\['A&nnotate', '<Plug>VCSAnnotate'],
-			\['&Commit', '<Plug>VCSCommit'],
-			\['Delete', '<Plug>VCSDelete'],
-			\['&Diff', '<Plug>VCSDiff'],
-			\['&Info', '<Plug>VCSInfo'],
-			\['&Log', '<Plug>VCSLog'],
-			\['Revert', '<Plug>VCSRevert'],
-			\['&Review', '<Plug>VCSReview'],
-			\['&Status', '<Plug>VCSStatus'],
-			\['&Update', '<Plug>VCSUpdate'],
-			\['&VimDiff', '<Plug>VCSVimDiff']
-			\]
-	call s:VCSCommandUtility.addMenuItem(s:shortcut, s:command)
-endfor
-unlet s:shortcut s:command
+if has('gui_running') 
+    for [s:shortcut, s:command] in [
+                            \['&Add', '<Plug>VCSAdd'],
+                            \['A&nnotate', '<Plug>VCSAnnotate'],
+                            \['&Commit', '<Plug>VCSCommit'],
+                            \['Delete', '<Plug>VCSDelete'],
+                            \['&Diff', '<Plug>VCSDiff'],
+                            \['&Info', '<Plug>VCSInfo'],
+                            \['&Log', '<Plug>VCSLog'],
+                            \['Revert', '<Plug>VCSRevert'],
+                            \['&Review', '<Plug>VCSReview'],
+                            \['&Status', '<Plug>VCSStatus'],
+                            \['&Update', '<Plug>VCSUpdate'],
+                            \['&VimDiff', '<Plug>VCSVimDiff']
+                            \]
+            call s:VCSCommandUtility.addMenuItem(s:shortcut, s:command)
+    endfor
+    unlet s:shortcut s:command
+endif
 
 " Section: Autocommands to restore vimdiff state {{{1
 augroup VimDiffRestore
