@@ -690,37 +690,6 @@ function! s:SetupBuffer()
 	let b:VCSCommandBufferSetup = 1
 endfunction
 
-" Function: s:MarkOrigBufferForSetup(buffer) {{{2
-" Resets the buffer setup state of the original buffer for a given VCS scratch
-" buffer.
-" Returns:  The VCS buffer number in a passthrough mode.
-
-function! s:MarkOrigBufferForSetup(buffer)
-	checktime
-	if a:buffer > 0
-		let origBuffer = VCSCommandGetOriginalBuffer(a:buffer)
-		" This should never not work, but I'm paranoid
-		if origBuffer != a:buffer
-			call setbufvar(origBuffer, 'VCSCommandBufferSetup', 0)
-		endif
-	endif
-	return a:buffer
-endfunction
-
-" Function: s:WipeoutCommandBuffers() {{{2
-" Clears all current VCS output buffers of the specified type for a given source.
-
-function! s:WipeoutCommandBuffers(originalBuffer, VCSCommand)
-	let buffer = 1
-	while buffer <= bufnr('$')
-		if getbufvar(buffer, 'VCSCommandOriginalBuffer') == a:originalBuffer
-			if getbufvar(buffer, 'VCSCommandCommand') == a:VCSCommand
-				execute 'bw' buffer
-			endif
-		endif
-		let buffer = buffer + 1
-	endwhile
-endfunction
 
 " Function: s:VimDiffRestore(vimDiffBuff) {{{2
 " Checks whether the given buffer is one whose deletion should trigger
@@ -931,7 +900,7 @@ function! s:VCSFinishCommit(logMessageList, originalBuffer)
 		if resultBuffer < 0
 			return resultBuffer
 		endif
-		return s:MarkOrigBufferForSetup(resultBuffer)
+		return vcscommand#utility#MarkOrigBufferForSetup(resultBuffer)
 	finally
 		call delete(messageFileName)
 	endtry
@@ -1003,7 +972,8 @@ function! s:VCSVimDiff(...)
 
 			if exists('t:vcsCommandVimDiffSourceBuffer') && t:vcsCommandVimDiffSourceBuffer != originalBuffer
 				" Clear the existing vimdiff setup by removing the result buffers.
-				call s:WipeoutCommandBuffers(t:vcsCommandVimDiffSourceBuffer, 'vimdiff')
+				" call s:WipeoutCommandBuffers(t:vcsCommandVimDiffSourceBuffer, 'vimdiff')
+				call vcscommand#utility#WipeCommandBuffers(t:vcsCommandVimDiffSourceBuffer, 'vimdiff')
 			endif
 
 			let orientation = &diffopt =~ 'horizontal' ? 'horizontal' : 'vertical'
@@ -1014,7 +984,7 @@ function! s:VCSVimDiff(...)
 			if(a:0 == 2)
 				" Reset the vimdiff system, as 2 explicit versions were provided.
 				if exists('t:vcsCommandVimDiffSourceBuffer')
-					call s:WipeoutCommandBuffers(t:vcsCommandVimDiffSourceBuffer, 'vimdiff')
+					call vcscommand#utility#WipeCommandBuffers(t:vcsCommandVimDiffSourceBuffer, 'vimdiff')
 				endif
 				let resultBuffer = s:VCSReview(a:1)
 				if resultBuffer < 0
@@ -1382,7 +1352,7 @@ endfunction
 
 " Section: Command definitions {{{1
 " Section: Primary commands {{{2
-com! -nargs=* VCSAdd call s:MarkOrigBufferForSetup(s:ExecuteVCSCommand('Add', [<f-args>]))
+com! -nargs=* VCSAdd call vcscommand#utility#MarkOrigBufferForSetup(s:ExecuteVCSCommand('Add', [<f-args>]))
 com! -nargs=* -bang VCSAnnotate call s:VCSAnnotate(<q-bang>, <f-args>)
 com! -nargs=* -bang VCSBlame call s:VCSAnnotate(<q-bang>, <f-args>)
 com! -nargs=? -bang VCSCommit call s:VCSCommit(<q-bang>, <q-args>)
@@ -1390,14 +1360,14 @@ com! -nargs=* VCSDelete call s:ExecuteVCSCommand('Delete', [<f-args>])
 com! -nargs=* VCSDiff call s:VCSDiff(<f-args>)
 com! -nargs=0 -bang VCSGotoOriginal call s:VCSGotoOriginal(<q-bang>)
 com! -nargs=* VCSInfo call s:ExecuteVCSCommand('Info', [<f-args>])
-com! -nargs=* VCSLock call s:MarkOrigBufferForSetup(s:ExecuteVCSCommand('Lock', [<f-args>]))
+com! -nargs=* VCSLock call vcscommand#utility#MarkOrigBufferForSetup(s:ExecuteVCSCommand('Lock', [<f-args>]))
 com! -nargs=* VCSLog call s:ExecuteVCSCommand('Log', [<f-args>])
 com! -nargs=* VCSRemove call s:ExecuteVCSCommand('Delete', [<f-args>])
-com! -nargs=0 VCSRevert call s:MarkOrigBufferForSetup(s:ExecuteVCSCommand('Revert', []))
+com! -nargs=0 VCSRevert call vcscommand#utility#MarkOrigBufferForSetup(s:ExecuteVCSCommand('Revert', []))
 com! -nargs=? VCSReview call s:VCSReview(<f-args>)
 com! -nargs=* VCSStatus call s:ExecuteVCSCommand('Status', [<f-args>])
-com! -nargs=* VCSUnlock call s:MarkOrigBufferForSetup(s:ExecuteVCSCommand('Unlock', [<f-args>]))
-com! -nargs=0 VCSUpdate call s:MarkOrigBufferForSetup(s:ExecuteVCSCommand('Update', []))
+com! -nargs=* VCSUnlock call vcscommand#utility#MarkOrigBufferForSetup(s:ExecuteVCSCommand('Unlock', [<f-args>]))
+com! -nargs=0 VCSUpdate call vcscommand#utility#MarkOrigBufferForSetup(s:ExecuteVCSCommand('Update', []))
 com! -nargs=* VCSVimDiff call s:VCSVimDiff(<f-args>)
 
 " Section: VCS buffer management commands {{{2
