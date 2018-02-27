@@ -26,3 +26,9 @@ function! vcscommand#utility#MarkOrigBufferForSetup(buffer)
 	endif
 	return a:buffer
 endfunction
+
+" Displays the given error in a consistent faction.  This is intended to be
+" invoked from a catch statement.
+function! vcscommand#utility#ReportError(error)
+	echohl WarningMsg|echomsg 'VCSCommand:  ' . a:error|echohl None
+endfunction

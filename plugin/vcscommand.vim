@@ -366,12 +366,6 @@ let s:isEditFileRunning = 0
 " Section: Utility functions {{{1
 
 " Function: s:ReportError(mapping) {{{2
-" Displays the given error in a consistent faction.  This is intended to be
-" invoked from a catch statement.
-
-function! s:ReportError(error)
-	echohl WarningMsg|echomsg 'VCSCommand:  ' . a:error|echohl None
-endfunction
 
 " Function: s:VCSCommandUtility.system(...) {{{2
 " Replacement for system() function.  This version protects the quoting in the
@@ -496,7 +490,7 @@ function! s:ExecuteVCSCommand(command, argList)
 		endif
 		return functionMap[a:command](a:argList)
 	catch
-		call s:ReportError(v:exception)
+		call vcscommand#utility#ReportError(v:exception)
 		return -1
 	endtry
 endfunction
