@@ -18,10 +18,10 @@ endfunction
 function! vcscommand#utility#MarkOrigBufferForSetup(buffer)
 	checktime
 	if a:buffer > 0
-		let origBuffer = VCSCommandGetOriginalBuffer(a:buffer)
+		let l:origBuffer = VCSCommandGetOriginalBuffer(a:buffer)
 		" This should never not work, but I'm paranoid
-		if origBuffer != a:buffer
-			call setbufvar(origBuffer, 'VCSCommandBufferSetup', 0)
+		if l:origBuffer != a:buffer
+			call setbufvar(l:origBuffer, 'VCSCommandBufferSetup', 0)
 		endif
 	endif
 	return a:buffer
