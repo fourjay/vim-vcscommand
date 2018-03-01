@@ -422,25 +422,7 @@ function! s:ClearMenu()
 	endif
 endfunction
 
-" Function: s:CreateMapping(shortcut, expansion, display) {{{2
-" Creates the given mapping by prepending the contents of
-" 'VCSCommandMapPrefix' (by default '<Leader>c') to the given shortcut and
-" mapping it to the given plugin function.  If a mapping exists for the
-" specified shortcut + prefix, emit an error but continue.  If a mapping
-" exists for the specified function, do nothing.
-
-function! s:CreateMapping(shortcut, expansion, display)
-	let lhs = VCSCommandGetOption('VCSCommandMapPrefix', '<Leader>c') . a:shortcut
-	if !hasmapto(a:expansion)
-		try
-			execute 'nmap <silent> <unique>' lhs a:expansion
-		catch /^Vim(.*):E227:/
-			if(&verbose != 0)
-				echohl WarningMsg|echomsg 'VCSCommand:  mapping ''' . lhs . ''' already exists, refusing to overwrite.  The mapping for ' . a:display . ' will not be available.'|echohl None
-			endif
-		endtry
-	endif
-endfunction
+" Function: vcscommand#utility#CreateMapping(shortcut, expansion, display) {{{2
 
 " Function: s:ExecuteExtensionMapping(mapping) {{{2
 " Invokes the appropriate extension mapping depending on the type of the
@@ -1157,7 +1139,7 @@ function! VCSCommandRegisterModule(name, path, commandMap, mappingMap)
 				\ && !VCSCommandGetOption('VCSCommandDisableExtensionMappings', 0)
 		for shortcut in keys(a:mappingMap)
 			let expansion = ":call <SID>ExecuteExtensionMapping('" . shortcut . "')<CR>"
-			call s:CreateMapping(shortcut, expansion, a:name . " extension mapping " . shortcut)
+			call vcscommand#utility#CreateMapping(shortcut, expansion, a:name . " extension mapping " . shortcut)
 		endfor
 	endif
 	return s:VCSCommandUtility
@@ -1416,7 +1398,7 @@ let s:defaultMappings = [
 
 if !exists("g:no_plugin_maps") && !VCSCommandGetOption('VCSCommandDisableMappings', 0)
 	for [s:shortcut, s:vcsFunction] in VCSCommandGetOption('VCSCommandMappings', s:defaultMappings)
-		call s:CreateMapping(s:shortcut, '<Plug>' . s:vcsFunction, '''' . s:vcsFunction . '''')
+		call vcscommand#utility#CreateMapping(s:shortcut, '<Plug>' . s:vcsFunction, '''' . s:vcsFunction . '''')
 	endfor
 	unlet s:shortcut s:vcsFunction
 endif
