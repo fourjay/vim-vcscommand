@@ -32,3 +32,22 @@ endfunction
 function! vcscommand#utility#ReportError(error)
 	echohl WarningMsg|echomsg 'VCSCommand:  ' . a:error|echohl None
 endfunction
+
+" Creates the given mapping by prepending the contents of
+" 'VCSCommandMapPrefix' (by default '<Leader>c') to the given shortcut and
+" mapping it to the given plugin function.  If a mapping exists for the
+" specified shortcut + prefix, emit an error but continue.  If a mapping
+" exists for the specified function, do nothing.
+
+function! vcscommand#utility#CreateMapping(shortcut, expansion, display)
+	let lhs = VCSCommandGetOption('VCSCommandMapPrefix', '<Leader>c') . a:shortcut
+	if !hasmapto(a:expansion)
+		try
+			execute 'nmap <silent> <unique>' lhs a:expansion
+		catch /^Vim(.*):E227:/
+			if(&verbose != 0)
+				echohl WarningMsg|echomsg 'VCSCommand:  mapping ''' . lhs . ''' already exists, refusing to overwrite.  The mapping for ' . a:display . ' will not be available.'|echohl None
+			endif
+		endtry
+	endif
+endfunction
